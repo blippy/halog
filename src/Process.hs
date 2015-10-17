@@ -16,7 +16,7 @@ count' m x =
 
 
 
-count = P.foldl count' M.empty 
+count recs = P.foldl count' M.empty recs
 
 p1 = count [(2015, 10), (2015, 11), (2014, 10), (2015,10)]
 
@@ -28,4 +28,11 @@ countReqs reqs =
     yrMths = P.map (\r -> ( rqYear r, rqMonth r)) reqs
     counts = count yrMths
     
+
+countUrls :: [Request] -> [(String, Int)]
+countUrls reqs =
+  toList counts
+  where
+    recs = P.map rqUrl reqs
+    counts = count recs
 

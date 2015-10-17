@@ -1,5 +1,7 @@
 module Main where
 
+--import Data.List
+import GHC.Exts
 import Text.Printf
 
 import Inputs
@@ -23,6 +25,15 @@ reportReqs reqs= do
   let outLines = map fmtYMcount counts
   writeFile "/home/mcarter/.halog/ymc.txt" $ unlines outLines
 
+fmtUrl :: (String, Int) -> String
+fmtUrl (u, c) = printf "%9d %s" c u
+
+reportUrls:: [Request] -> IO ()
+reportUrls reqs = do
+  let counts = reverse $ sortWith snd $ countUrls reqs
+  let outLines = map fmtUrl counts
+  writeFile "/home/mcarter/.halog/urls.txt" $ unlines outLines
+
 test1 = do
   reqs <-inputTxt root
   reportReqs reqs
@@ -30,4 +41,5 @@ test1 = do
 main = do
   reqs <- inputAll
   reportReqs reqs
+  reportUrls reqs
   print "Finished"
