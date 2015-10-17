@@ -9,14 +9,10 @@ import Text.ParserCombinators.Parsec.Combinator as Co
 import Text.ParserCombinators.Parsec.Prim as Pr
 import Text.ParserCombinators.Parsec.Token as T
 
+import Types
 --data Date = Date {dtYear::Int, dtMonth::Int, dtDay::Int } deriving (Show)
 
-data Request = Request
-               {rqYear::Int
-               , rqMonth::Int
-               , rqDay::Int -- Jan = 1
-               , url::String
-               } deriving (Show)
+
 
 logLines :: Parser [Request]
 logLines = many logLine
@@ -42,20 +38,43 @@ logLine = do
   
   return $ Request y m d url
 
+monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"
+              , "Sep", "Oct", "Nov", "Dec"]
+findMonth:: String -> Int -- starting from 1             
+findMonth mmm = 1 + (fromJust $ findIndex (== mmm) monthNames)            
 
 dater :: Parser (Int, Int, Int)
 dater = do
   d <- P.count 2 Ch.digit
   let d' = read d ::Int
   char '/'
-  let mths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug" ,
-              "Sep", "Oct", "Nov", "Dec"]
-  m <- Co.choice $ map Ch.string mths -- [Ch.string "Oct"]
-  let mth = 1 + (fromJust $ findIndex (== m) mths)
+
+  --m <- Co.choice $ map Ch.string mths -- [Ch.string "Oct"]
+  m <- monther
   char '/'
   y <-P.count 4 Ch.digit
   let y' = read y ::Int
-  return (y', mth, d')
+  return (y', m, d')
+
+
+
+monther :: Parser Int
+monther = do
+  m <- try (Ch.string "Jan")
+       <|> try (Ch.string "Feb")
+       <|> try (Ch.string "Mar")
+       <|> try (Ch.string "Apr")
+       <|> try (Ch.string "May")
+       <|> try (Ch.string "Jun")
+       <|> try (Ch.string "Jul")
+       <|> try (Ch.string "Aug")
+       <|> try (Ch.string "Sep")
+       <|> try (Ch.string "Oct")
+       <|> try (Ch.string "Nov")       
+       <|> (Ch.string "Dec")
+  return $ findMonth m
+
+m1 = parse monther "m1" "Maz"
 
 d1 = parse dater "" "12/Oct/2015"
 --             1         2         3         4
@@ -63,6 +82,24 @@ d1 = parse dater "" "12/Oct/2015"
 t1 = "217.69.133.218 - - [16/Oct/2015:17:51:09 +0100] \"GET /graphics.htm HTTP/1.1\" 200 1003 \"-\" \"Mozilla/5.0 (compatible; Linux x86_64; Mail.RU_Bot/2.0; +http://go.mail.ru/help/robots)\""
 
 t1a = parse logLine "(unknown)" t1
+
+
+t2 = "178.154.243.97 - - [03/May/2015:06:26:19 +0100] \"GET /money/money.html HTTP/1.1\" 404 151 \"-\" \"Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)\""
+
+t2a = parse logLine "t2" t2
+
+t3 = parse (Co.choice [Ch.string "Jan", Ch.string "Mar", Ch.string "May"]) "t3" "May"
+
+
+t4 = parse (try (Ch.string "Jan") <|> try (Ch.string "Mar") <|> try (Ch.string "May")) "t4" "May"
+
+--t5 = parse (do T.reservedNames ["Jan", "Mar", "May"] ) "t5" "May"
+
+t6 = parse monther "t5" "May"
+
+--t5 m =  try (Ch.string) "Jan"
+
+--t5 = parse ((Co.choice $ map (try . Ch.string) ["Jan", "Mar", "May"])) "May"
 
 {-
 --parseStr :: String -> [Atom]
@@ -79,9 +116,9 @@ mainParser = do
 
 -}
 
-parseStr :: String -> [Request]
-parseStr text =
-  let ast = parse logLines "Unknown" text in
+parseStr :: String -> String -> [Request]
+parseStr desc text =
+  let ast = parse logLines desc text in
   case ast of
     Left l -> error $ "Failed parsing:" ++  show l
     Right r -> r

@@ -17,4 +17,13 @@ executable halog
   main-is:             Main.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
-                       , parsec == 3.1.9
+                     , bytestring == 0.10.6.0
+                     , containers >= 0.3 && <0.6
+                     , directory >=1.2 && <1.3
+                     , MissingH >= 1.3 && <1.4
+                     , parsec == 3.1.9
+                     , zlib == 0.5.4.2
+  other-modules:       Inputs
+                     , Parser
+                     , Process
+                     
