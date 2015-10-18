@@ -58,8 +58,11 @@ dater = do
 
 
 
+monthnames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"
+             ,"Aug", "Sep", "Oct", "Nov", "Dec"]
 monther :: Parser Int
 monther = do
+  {-
   m <- try (Ch.string "Jan")
        <|> try (Ch.string "Feb")
        <|> try (Ch.string "Mar")
@@ -72,7 +75,12 @@ monther = do
        <|> try (Ch.string "Oct")
        <|> try (Ch.string "Nov")       
        <|> (Ch.string "Dec")
-  return $ findMonth m
+-}
+  m3 <- P.count 3 letter
+  case elemIndex m3 monthnames of
+    Just x -> return (1+x)
+    Nothing -> unexpected $ "month: " ++ m3
+  --  return $ findMonth m
 
 m1 = parse monther "m1" "Maz"
 
