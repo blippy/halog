@@ -1,0 +1,11 @@
+#/usr/bin/env bash
+# developer package manager
+
+CWD=`pwd`
+
+file-bin () {
+	ln -s $CWD/$2 ~/.local/bin/$1 
+}
+
+source dpm.cfg
+
